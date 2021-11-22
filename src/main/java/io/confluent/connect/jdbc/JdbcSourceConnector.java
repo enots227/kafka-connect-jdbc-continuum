@@ -192,6 +192,11 @@ public class JdbcSourceConnector extends SourceConnector {
         }
       }
     }
+
+    if (JdbcSourceTask.continuumProducer != null) {
+      log.debug("Stopping JdbcSourceTask... Continuum producer detected, closing producer.");
+      JdbcSourceTask.continuumProducer.close();
+    }
   }
 
   @Override

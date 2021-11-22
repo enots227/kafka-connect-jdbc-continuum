@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Map;
 
+import io.confluent.connect.jdbc.continuum.JdbcContinuumSink;
 import io.confluent.connect.jdbc.dialect.DatabaseDialect;
 import io.confluent.connect.jdbc.dialect.DatabaseDialects;
 import io.confluent.connect.jdbc.util.Version;
@@ -39,6 +40,7 @@ public class JdbcSinkTask extends SinkTask {
   JdbcSinkConfig config;
   JdbcDbWriter writer;
   int remainingRetries;
+  public static JdbcContinuumSink continuumProducer;
 
   @Override
   public void start(final Map<String, String> props) {
@@ -46,6 +48,10 @@ public class JdbcSinkTask extends SinkTask {
     config = new JdbcSinkConfig(props);
     initWriter();
     remainingRetries = config.maxRetries;
+
+    if (continuumProducer == null) {
+      continuumProducer = new JdbcContinuumSink(config);
+    }
   }
 
   void initWriter() {
@@ -73,6 +79,8 @@ public class JdbcSinkTask extends SinkTask {
     );
     try {
       writer.write(records);
+
+      continuumProducer.continueOn(records, 200);
     } catch (SQLException sqle) {
       log.warn(
           "Write of {} records failed, remainingRetries={}",
@@ -89,6 +97,7 @@ public class JdbcSinkTask extends SinkTask {
       SQLException sqlAllMessagesException = new SQLException(sqleAllMessages);
       sqlAllMessagesException.setNextException(sqle);
       if (remainingRetries == 0) {
+        continuumProducer.continueOn(records, 500);
         log.error(
             "Failing task after exhausting retries; "
               + "encountered {} exceptions on last write attempt. "

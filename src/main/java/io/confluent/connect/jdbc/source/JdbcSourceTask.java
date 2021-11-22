@@ -42,6 +42,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import io.confluent.connect.jdbc.continuum.JdbcContinuumSource;
 import io.confluent.connect.jdbc.dialect.DatabaseDialect;
 import io.confluent.connect.jdbc.dialect.DatabaseDialects;
 import io.confluent.connect.jdbc.util.CachedConnectionProvider;
@@ -66,6 +67,7 @@ public class JdbcSourceTask extends SourceTask {
   private CachedConnectionProvider cachedConnectionProvider;
   private PriorityQueue<TableQuerier> tableQueue = new PriorityQueue<TableQuerier>();
   private final AtomicBoolean running = new AtomicBoolean(false);
+  public static JdbcContinuumSource continuumProducer;
 
   public JdbcSourceTask() {
     this.time = new SystemTime();
@@ -257,6 +259,10 @@ public class JdbcSourceTask extends SourceTask {
       }
     }
 
+    if (continuumProducer == null) {
+      continuumProducer = new JdbcContinuumSource(config);
+    }
+
     running.set(true);
     log.info("Started JDBC source task");
   }
@@ -399,6 +405,9 @@ public class JdbcSourceTask extends SourceTask {
         }
 
         log.debug("Returning {} records for {}", results.size(), querier.toString());
+
+        continuumProducer.continueOn(results, 200);
+
         return results;
       } catch (SQLException sqle) {
         log.error("Failed to run query for table {}: {}", querier.toString(), sqle);
