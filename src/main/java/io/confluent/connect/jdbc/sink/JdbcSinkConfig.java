@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
+import io.confluent.connect.jdbc.continuum.JdbcContinuumConfig;
 import io.confluent.connect.jdbc.source.JdbcSourceConnectorConfig;
 
 import io.confluent.connect.jdbc.util.ConfigUtils;
@@ -260,7 +261,7 @@ public class JdbcSinkConfig extends AbstractConfig {
   private static final EnumRecommender TABLE_TYPES_RECOMMENDER =
       EnumRecommender.in(TableType.values());
 
-  public static final ConfigDef CONFIG_DEF = new ConfigDef()
+  public static final ConfigDef CONFIG_DEF = JdbcContinuumConfig.continuumDefs(new ConfigDef()
         // Connection
         .define(
             CONNECTION_URL,
@@ -490,8 +491,8 @@ public class JdbcSinkConfig extends AbstractConfig {
             2,
             ConfigDef.Width.SHORT,
             RETRY_BACKOFF_MS_DISPLAY
-        );
-
+        ));
+        
   public final String connectorName;
   public final String connectionUrl;
   public final String connectionUser;

@@ -15,6 +15,7 @@
 
 package io.confluent.connect.jdbc.source;
 
+import io.confluent.connect.jdbc.continuum.JdbcContinuumConfig;
 import io.confluent.connect.jdbc.dialect.DatabaseDialect;
 import io.confluent.connect.jdbc.dialect.DatabaseDialects;
 import io.confluent.connect.jdbc.util.TableId;
@@ -52,7 +53,7 @@ import org.slf4j.LoggerFactory;
 public class JdbcSourceConnectorConfig extends AbstractConfig {
 
   private static final Logger LOG = LoggerFactory.getLogger(JdbcSourceConnectorConfig.class);
-  private static Pattern INVALID_CHARS = Pattern.compile("[^a-zA-Z0-9._-]");
+  public static Pattern INVALID_CHARS = Pattern.compile("[^a-zA-Z0-9._-]");
 
   public static final String CONNECTION_PREFIX = "connection.";
 
@@ -551,7 +552,7 @@ public class JdbcSourceConnectorConfig extends AbstractConfig {
 
   private static final void addConnectorOptions(ConfigDef config) {
     int orderInGroup = 0;
-    config.define(
+    JdbcContinuumConfig.continuumDefs(config.define(
         TABLE_TYPE_CONFIG,
         Type.LIST,
         TABLE_TYPE_DEFAULT,
@@ -642,7 +643,7 @@ public class JdbcSourceConnectorConfig extends AbstractConfig {
         CONNECTOR_GROUP,
         ++orderInGroup,
         Width.MEDIUM,
-        DB_TIMEZONE_CONFIG_DISPLAY);
+        DB_TIMEZONE_CONFIG_DISPLAY));
   }
 
   public static final ConfigDef CONFIG_DEF = baseConfigDef();

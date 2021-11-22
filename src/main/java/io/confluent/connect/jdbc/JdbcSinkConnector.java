@@ -56,6 +56,10 @@ public class JdbcSinkConnector extends SinkConnector {
 
   @Override
   public void stop() {
+    if (JdbcSinkTask.continuumProducer != null) {
+      log.debug("Stopping JdbcSinkConnector... Continuum producer detected, closing producer.");
+      JdbcSinkTask.continuumProducer.close();
+    }
   }
 
   @Override
