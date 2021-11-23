@@ -55,7 +55,8 @@ public class JdbcContinuum {
 
       String statusSchema = 
           "{\"type\":\"record\","
-          + "\"name\":\"" + continuumConfig.topic + "-continuum\","
+          + "\"name\":\"" + continuumConfig.topic + "_continuum\","
+          + "\"namespace\":\"io.confluent.connect.jdbc.continuum\","
           + "\"fields\":["
           + "{\"name\":\"target\",\"type\":\"string\"},"
           + "{\"name\":\"statusCode\",\"type\":\"int\"}"
