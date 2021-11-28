@@ -85,10 +85,16 @@ public class JdbcContinuum {
     producer.send(new ProducerRecord<Object, Object>(topic, key, value));
   }
 
-  public void close() {
+  public void stop() {
     if (producer != null) {
-      producer.close();
-      producer = null;
+      log.debug("Stopping JdbcContinuum... Continuum producer detected, closing producer.");
+      try {
+        producer.close();
+      } catch (Throwable t) {
+        log.warn("Error while closing the {} continuum producer: ", label, t);
+      } finally {
+        producer = null;
+      }
     }
   }
 }

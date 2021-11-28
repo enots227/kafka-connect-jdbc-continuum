@@ -40,7 +40,7 @@ public class JdbcSinkTask extends SinkTask {
   JdbcSinkConfig config;
   JdbcDbWriter writer;
   int remainingRetries;
-  public static JdbcContinuumSink continuumProducer;
+  public JdbcContinuumSink continuumProducer;
 
   @Override
   public void start(final Map<String, String> props) {
@@ -139,6 +139,8 @@ public class JdbcSinkTask extends SinkTask {
         dialect = null;
       }
     }
+
+    continuumProducer.stop();
   }
 
   @Override
