@@ -54,7 +54,7 @@ public class JdbcContinuumSource extends JdbcContinuum {
         }
       } catch (IllegalStateException e) {
         log.error("Fatal: Cannot produce Continuum record", e);
-        close();
+        stop();
       }
     }
   }

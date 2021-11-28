@@ -322,6 +322,9 @@ public class JdbcSourceTask extends SourceTask {
   public void stop() throws ConnectException {
     log.info("Stopping JDBC source task");
     running.set(false);
+    
+    continuumProducer.stop();
+
     // All resources are closed at the end of 'poll()' when no longer running or
     // if there is an error
   }
