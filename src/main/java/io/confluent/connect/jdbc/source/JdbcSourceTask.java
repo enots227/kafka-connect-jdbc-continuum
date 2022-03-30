@@ -409,7 +409,7 @@ public class JdbcSourceTask extends SourceTask {
 
         log.debug("Returning {} records for {}", results.size(), querier.toString());
 
-        continuumProducer.continueOn(results, 200);
+        continuumProducer.continueOn(results, JdbcContinuumSource.Outcome.SUCCESS);
 
         return results;
       } catch (SQLException sqle) {

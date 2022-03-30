@@ -35,7 +35,7 @@ public class JdbcContinuumConfig {
   public static final String CONTINUUM_LABEL_CONFIG =
       "continuum.label";
   private static final String CONTINUUM_LABEL_DOC =
-      "The label associated with the completion of this sink connector record processing.";
+      "The label associated with the completion of a connector task.";
   private static final String CONTINUUM_LABEL_DISPLAY =
       "Continuum Label";
 
@@ -53,6 +53,20 @@ public class JdbcContinuumConfig {
   private static final String CONTINUUM_SCHEMA_REGISTRY_URL_DISPLAY = 
       "Continuum Schema Registry";
 
+  public static final String CONTINUUM_VERSION_COLUMN_NAME_CONFIG =
+      "continuum.version.column.name";
+  private static final String CONTINUUM_VERSION_COLUMN_NAME_DOC =
+      "The column name that stores the record version.";
+  private static final String CONTINUUM_VERSION_COLUMN_NAME_DISPLAY = 
+      "Continuum Version Column Name";
+
+  public static final String CONTINUUM_UPDATED_ON_COLUMN_NAME_CONFIG =
+      "continuum.updatedOn.column.name";
+  private static final String CONTINUUM_UPDATED_ON_COLUMN_NAME_DOC =
+      "The column name that stores the record last updated on datetime.";
+  private static final String CONTINUUM_UPDATED_ON_COLUMN_NAME_DISPLAY = 
+      "Continuum Last Updated On Column Name";
+
   public static JdbcContinuumConfigValues parseConfigValues(AbstractConfig config) {
     JdbcContinuumConfigValues values = new JdbcContinuumConfigValues();
 
@@ -66,6 +80,10 @@ public class JdbcContinuumConfig {
         .getString(JdbcContinuumConfig.CONTINUUM_BOOTSTRAP_SERVERS_CONFIG);
     values.schemaRegistryURL = config
         .getString(JdbcContinuumConfig.CONTINUUM_SCHEMA_REGISTRY_URL_CONFIG);
+    values.versionColumnName = config
+        .getString(JdbcContinuumConfig.CONTINUUM_VERSION_COLUMN_NAME_CONFIG);
+    values.updatedOnColumnName = config
+        .getString(JdbcContinuumConfig.CONTINUUM_UPDATED_ON_COLUMN_NAME_CONFIG);
 
     return values;
   }
@@ -132,7 +150,27 @@ public class JdbcContinuumConfig {
         CONTINUUM_GROUP,
         4,
         ConfigDef.Width.MEDIUM,
-        CONTINUUM_LABEL_DISPLAY);
+        CONTINUUM_LABEL_DISPLAY
+      ).define(
+        CONTINUUM_VERSION_COLUMN_NAME_CONFIG,
+        ConfigDef.Type.STRING,
+        "",
+        ConfigDef.Importance.HIGH,
+        CONTINUUM_VERSION_COLUMN_NAME_DOC,
+        CONTINUUM_GROUP,
+        5,
+        ConfigDef.Width.MEDIUM,
+        CONTINUUM_VERSION_COLUMN_NAME_DISPLAY
+      ).define(
+        CONTINUUM_UPDATED_ON_COLUMN_NAME_CONFIG,
+        ConfigDef.Type.STRING,
+        "",
+        ConfigDef.Importance.HIGH,
+        CONTINUUM_UPDATED_ON_COLUMN_NAME_DOC,
+        CONTINUUM_GROUP,
+        6,
+        ConfigDef.Width.MEDIUM,
+        CONTINUUM_UPDATED_ON_COLUMN_NAME_DISPLAY);
   }
 
 }

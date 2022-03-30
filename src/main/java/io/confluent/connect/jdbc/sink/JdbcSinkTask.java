@@ -80,7 +80,7 @@ public class JdbcSinkTask extends SinkTask {
     try {
       writer.write(records);
 
-      continuumProducer.continueOn(records, 200);
+      continuumProducer.continueOn(records, JdbcContinuumSink.Outcome.SUCCESS);
     } catch (SQLException sqle) {
       log.warn(
           "Write of {} records failed, remainingRetries={}",
@@ -97,7 +97,7 @@ public class JdbcSinkTask extends SinkTask {
       SQLException sqlAllMessagesException = new SQLException(sqleAllMessages);
       sqlAllMessagesException.setNextException(sqle);
       if (remainingRetries == 0) {
-        continuumProducer.continueOn(records, 500);
+        continuumProducer.continueOn(records, JdbcContinuumSink.Outcome.FAILURE);
         log.error(
             "Failing task after exhausting retries; "
               + "encountered {} exceptions on last write attempt. "

@@ -16,6 +16,7 @@
 package io.confluent.connect.jdbc.continuum;
 
 import java.util.Collection;
+import java.util.Date;
 
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.connect.data.Struct;
@@ -29,6 +30,8 @@ public class JdbcContinuumSource extends JdbcContinuum {
   private static final Logger log = LoggerFactory.getLogger(JdbcContinuumSource.class);
 
   private String incrementingColumnName;
+  private String versionColumnName;
+  private String updatedOnColumnName;
 
   public JdbcContinuumSource(AbstractConfig config) {
     super(config);
@@ -36,21 +39,35 @@ public class JdbcContinuumSource extends JdbcContinuum {
     if (isActive()) {
       incrementingColumnName = config.getString(
           JdbcSourceTaskConfig.INCREMENTING_COLUMN_NAME_CONFIG);
+      versionColumnName = config.getString(
+          JdbcContinuumConfig.CONTINUUM_VERSION_COLUMN_NAME_CONFIG);
+      updatedOnColumnName = config.getString(
+        JdbcContinuumConfig.CONTINUUM_UPDATED_ON_COLUMN_NAME_CONFIG);
     }
   }
 
-  public void continueOn(Collection<SourceRecord> records, Integer statusCode) {
+  public void continueOn(Collection<SourceRecord> records, Outcome outcome) {
     if (isActive()) {
       try {
         log.debug("Signalling source continuum for {} records with status code {}", 
-            records.size(), statusCode);
+            records.size(), outcome);
         for (SourceRecord record : records) {
           log.trace("Signalling source continuum for {}", record.value());
 
           Struct recordValue = (Struct) record.value();
           String key = recordValue.get(incrementingColumnName).toString();
 
-          produce(key, statusCode);
+          String version = null;
+          if (versionColumnName.length() > 0) {
+            version = recordValue.get(versionColumnName).toString();
+          }
+
+          Date updatedOn = null;
+          if (updatedOnColumnName.length() > 0) {
+            updatedOn = (Date) recordValue.get(updatedOnColumnName);
+          }
+          
+          produce(key, outcome, version, updatedOn);
         }
       } catch (IllegalStateException e) {
         log.error("Fatal: Cannot produce Continuum record", e);

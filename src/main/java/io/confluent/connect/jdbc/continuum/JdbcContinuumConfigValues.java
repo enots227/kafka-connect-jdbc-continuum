@@ -27,6 +27,8 @@ public class JdbcContinuumConfigValues {
   public String label;
   public String bootstrapServers;
   public String schemaRegistryURL;
+  public String versionColumnName;
+  public String updatedOnColumnName;
 
   public boolean isConfigured() {
     if (topic != "" || bootstrapServers != "" || schemaRegistryURL != "") {
@@ -52,6 +54,7 @@ public class JdbcContinuumConfigValues {
       return true;
     }
 
+    log.info("Continuum properties are not configured.");
     return false;
   }
 }

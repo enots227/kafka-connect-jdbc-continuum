@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
+import java.util.Date;
 
 import static org.apache.kafka.clients.CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG;
@@ -39,6 +40,8 @@ public class JdbcContinuum {
   private String topic;
   private String label;
   private Schema valueSchema;
+
+  public static enum Outcome { SUCCESS, FAILURE }
 
   public JdbcContinuum(AbstractConfig config) {
     final JdbcContinuumConfigValues continuumConfig = JdbcContinuumConfig.parseConfigValues(config);
@@ -58,8 +61,11 @@ public class JdbcContinuum {
           + "\"name\":\"" + continuumConfig.topic + "_continuum\","
           + "\"namespace\":\"io.confluent.connect.jdbc.continuum\","
           + "\"fields\":["
-          + "{\"name\":\"target\",\"type\":\"string\"},"
-          + "{\"name\":\"statusCode\",\"type\":\"int\"}"
+          + "{\"name\":\"label\",\"type\":\"string\"},"
+          + "{\"name\":\"outcome\",\"type\":\"int\"},"
+          + "{\"name\":\"version\",\"type\":[\"null\",\"string\"],\"default\":null},"
+          + "{\"name\":\"updatedOn\",\"type\":[\"null\",{\"type\":\"long\","
+          + "\"logicalType\":\"timestamp-millis\"}],\"default\":null}"
           + "]}";
       Schema.Parser parser = new Schema.Parser();
       valueSchema = parser.parse(statusSchema);
@@ -77,10 +83,21 @@ public class JdbcContinuum {
     return producer != null;
   }
 
-  public void produce(String key, Integer statusCode) {
+  public int outcomeToInt(Outcome outcome) {
+    switch (outcome) {
+      case SUCCESS:
+        return 1;
+      default:
+        return 0;
+    }
+  }
+
+  public void produce(String key, Outcome outcome, String version, Date updatedOn) {
     GenericRecord value = new GenericData.Record(valueSchema);
-    value.put("target", label);
-    value.put("statusCode", statusCode);
+    value.put("label", label);
+    value.put("outcome", outcomeToInt(outcome));
+    value.put("version", version);
+    value.put("updatedOn", updatedOn != null ? updatedOn.getTime() : null);
 
     producer.send(new ProducerRecord<Object, Object>(topic, key, value));
   }
